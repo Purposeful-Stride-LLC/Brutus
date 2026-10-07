@@ -1,0 +1,23 @@
+# ============================================================================
+# BRUTUS TARGET SCOPE  (the wardog's leash)
+# ============================================================================
+# One authorized target per line: a hostname, an IP, or a CIDR range.
+# Lines starting with '#' and blank lines are ignored. Anything after a '#'
+# on a line is treated as a comment.
+#
+# In --real mode Brutus will ONLY scan the targets listed here (plus any
+# passed with --scope). With NO targets at all, Brutus REFUSES to hunt.
+#
+# >>> SCOPE ONLY HOSTS YOU OWN OR ARE EXPLICITLY AUTHORIZED TO TEST. <<<
+# ----------------------------------------------------------------------------
+
+# Safe default: this machine only.
+localhost
+127.0.0.1
+
+# --- Widen responsibly (uncomment / edit, authorized targets only) ---------
+# Your own local subnet (example - set to YOUR range before enabling):
+# 192.168.1.0/24
+#
+# A single authorized host on your LAN:
+# 192.168.1.10

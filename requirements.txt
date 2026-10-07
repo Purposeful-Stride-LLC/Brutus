@@ -1,0 +1,8 @@
+# Brutus runs on the Python 3.8+ standard library alone - no pip installs needed.
+# (argparse, socket, ipaddress, sqlite3, concurrent.futures, json are all stdlib.)
+#
+# The NOVA palace write path (nova_hunt.py) imports NOVA's own `nova` package
+# from the fieldkit; it is located automatically or via the NOVA_HOME env var.
+#
+# Optional (only used by some NOVA modules, NOT required by Brutus itself):
+# psutil

@@ -1,0 +1,23 @@
+# Python bytecode / caches
+__pycache__/
+*.pyc
+*.pyo
+
+# Backups
+*.bak-*
+*.bak
+
+# Generated reports / local scan findings (never commit live findings)
+report.html
+brutus_last_hunt.json
+target_analysis_report.txt
+
+# Build output
+dist/
+build/
+*.spec
+
+# Databases / data
+*.db
+*.sqlite
+*.sqlite3
