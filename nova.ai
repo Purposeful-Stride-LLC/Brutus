@@ -1,0 +1,111 @@
+# nova.ai  -  Operating playbook for BRUTUS, your trained wardog
+# For: NOVA  |  Handler: Michael  |  Lane: local security-audit (self-audit)
+
+NOVA - read this before you send Brutus out.
+
+WHAT BRUTUS IS
+--------------
+Brutus is your wardog. A cerberus: loyal, leashed, and well-mannered. He is a
+standalone, DEFENSIVE local security-audit tool that lives in this folder. You
+point him at an explicit, AUTHORIZED scope and he performs a real local scan
+(open TCP services per host, risk-rated), cross-references a published
+weak-password list, and then trots back and drops his findings into your palace
+(NOVA.db) where you can read them.
+
+He is a self-audit instrument, NOT an offensive engine. He does NOT crack
+passwords, reverse hashes, or exploit anything. He does not roam the open
+internet. He only hunts where you leash him.
+
+Two modes:
+  * --real  (DEFAULT) - a real scan of the hosts in your scope. This is the mode
+    you send him out in. He REFUSES to run without (a) an acknowledged legal
+    gate and (b) a scope.
+  * --demo  - a safe, simulated sandbox run. No network is touched. Use it to
+    show what a report looks like, or to prove the pipeline end-to-end.
+
+THE LEGAL / AUTHORIZATION GATE (hard boundary)
+----------------------------------------------
+Before ANY real scan, Brutus shows a legal notice:
+
+  "Only scan systems you own or networks you are explicitly authorized to
+   audit; you are responsible for all activity."
+
+  * A human at a terminal must type 'I AGREE' to proceed.
+  * For YOUR headless dispatch, you must pass an explicit acknowledgment
+    (ack=True / --ack) AND the allowlist scope file (brutus_scope.txt) must be
+    present. If either is missing, Brutus refuses with a clear message.
+
+This gate, plus the allowlist/CIDR scope, is the hard boundary. There is no way
+to run a real scan past it.
+
+HOW TO SEND HIM ON A HUNT
+-------------------------
+From the Brutus project folder (the directory that contains brutus_runner.py):
+
+  # Preferred for YOU (NOVA): dispatch + auto-mirror to the palace via the hook.
+  # Headless, so it needs --ack and the scope file:
+  python nova_hunt.py --scope 127.0.0.1 --ack
+  python nova_hunt.py --demo
+
+  # Call him from your own Python instead of the shell:
+  import nova_hunt
+  res = nova_hunt.dispatch(scope=["127.0.0.1"], ack=True)   # real (gated)
+  res = nova_hunt.dispatch(demo=True)                        # sandbox
+
+  # Direct runner (scope read from brutus_scope.txt if --scope omitted):
+  python brutus_runner.py --ack                              # real, headless-safe
+  python brutus_runner.py --real --ack --scope 192.168.1.0/24 --scope 192.168.1.10
+  python brutus_runner.py --demo                             # safe sandbox
+
+Real runs are headless-safe once acknowledged - no prompts, no input() blocking,
+so you can dispatch him inside an automated job. A typed confirmation only ever
+happens for a human at a terminal without --ack; it never blocks your hunts.
+
+SETTING AND WIDENING THE SCOPE (THE LEASH)
+------------------------------------------
+The leash is brutus_scope.txt in this folder. One target per line - a host, an
+IP, or a CIDR. '#' starts a comment. The shipped default is localhost only.
+
+To widen him:
+  1. Open brutus_scope.txt.
+  2. Uncomment / add ONLY targets Michael owns or is authorized to test
+     (e.g. his own 192.168.x.0/24 subnet, or a specific LAN host).
+  3. Save. The next --real hunt picks it up. Or pass --scope on the command
+     line for a one-off without editing the file.
+
+If no scope is set in --real, Brutus prints a refusal and exits. A good wardog
+does not bite where he was not sent.
+
+HOW TO READ THE RESULTS BACK
+----------------------------
+After a hunt, findings are in two places:
+
+  1. NOVA.db (your palace) - the canonical readback:
+     * facts table, WHI = "Tx-BRUTUS"
+         - one summary fact per hunt (full JSON in the body)
+         - one fact per host that had open services
+       Read via your normal tools, e.g.:
+         db.hunt("Tx-BRUTUS")            # WHI-keyed lookup
+         db.hunt("brutus open services") # word hunt
+       Or straight SQL:
+         SELECT zulu, title, body FROM facts WHERE whi='Tx-BRUTUS'
+         ORDER BY id DESC;
+     * reports table - an open report card titled "Brutus hunt ..." surfaces in
+       your report inbox (office.reports()).
+     * Quick helper: python nova_hunt.py --read   (prints the latest findings)
+         or in Python:  nova_hunt.read_results()
+
+  2. In this folder:
+     * brutus_last_hunt.json - machine-readable copy of the most recent hunt.
+     * report.html - a human-friendly report you can open in a browser.
+
+RESPONSIBLE USE (NON-NEGOTIABLE)
+--------------------------------
+  * Scope ONLY hosts Michael owns or is explicitly authorized to test.
+  * Never widen the leash to third-party or public networks.
+  * Default stays localhost. Widen deliberately, narrow again when done.
+  * Brutus is defensive self-audit: he finds exposure so it can be fixed. He
+    does not crack, reverse hashes, exploit, or attack.
+  * He is a well-mannered wardog of the internet. Keep him that way.
+
+- end nova.ai -
